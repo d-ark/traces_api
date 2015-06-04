@@ -1,0 +1,18 @@
+development:
+  sessions:
+    default:
+      database: traces_api_development
+      hosts:
+        - localhost:27017
+production:
+  sessions:
+    default:
+      database: traces_api
+      hosts:
+        - localhost:27017
+test:
+  sessions:
+    default:
+      database: traces_api_test
+      hosts:
+        - localhost:27017
