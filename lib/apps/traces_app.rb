@@ -3,15 +3,17 @@ module TracesApi
     before { headers['Content-Type'] = 'application/json' }
 
     get '/' do
+      # TODO! Remove call of ensure_value_has_distance_and_save! when all records are saved with distances
       {
         total_count: Trace.all.count,
-        traces: Trace.all.limit(limit).skip(offset)
+        traces: Trace.all.limit(limit).skip(offset).map(&:ensure_value_has_distance_and_save!)
       }.to_json
     end
 
     get '/:id' do
       resque_from_not_found_error do
-        Trace.find(params[:id]).to_json
+        # TODO! Remove call of ensure_value_has_distance_and_save! when all records are saved with distances
+        Trace.find(params[:id]).ensure_value_has_distance_and_save!.to_json
       end
     end
 

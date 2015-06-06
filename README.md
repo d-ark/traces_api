@@ -31,3 +31,18 @@ It provides full REST API for resource trace. The following routes are allowed:
   POST /traces/:id    # update trace
   DELETE /traces/:id  # remove trace
 ```
+In this version added distance field to each point. Distance is calculated on record save
+
+### Important!
+To provide compatibility with old records (without distance) in database special
+method `ensure_value_has_distance_and_save!` was added to trace model.
+
+Now its called on each GET request to caluculate distance if necessary.
+
+You need to run the calculation process in background to update all old records to new format and then remove
+this method. You can use following rake task for that:
+
+```ruby
+rake distance:calculate_all
+```
+

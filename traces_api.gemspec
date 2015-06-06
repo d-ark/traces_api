@@ -23,4 +23,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_runtime_dependency "nyny"
   spec.add_runtime_dependency "mongoid"
+  spec.add_runtime_dependency "geo-distance"
 end
