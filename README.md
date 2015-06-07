@@ -35,14 +35,14 @@ In this version added distance field to each point. Distance is calculated on re
 
 ### Important!
 To provide compatibility with old records (without distance) in database special
-method `ensure_value_has_distance_and_save!` was added to trace model.
+method `ensure_value_has_distance_and_elevation_and_save!` was added to trace model.
 
-Now its called on each GET request to caluculate distance if necessary.
+Now its called on each GET request to caluculate distance and get elevation if necessary.
 
 You need to run the calculation process in background to update all old records to new format and then remove
 this method. You can use following rake task for that:
 
 ```ruby
-rake distance:calculate_all
+rake trace:update_records
 ```
 

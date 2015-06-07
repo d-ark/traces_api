@@ -1,6 +1,4 @@
 require 'mongoid'
-require 'geo-distance'
-
 
 class GPSPointsValidator < ActiveModel::Validator
   def validate(record)
@@ -13,7 +11,7 @@ class GPSPointsValidator < ActiveModel::Validator
 
   private
 
-  ALLOWED_KEYS = [:latitude, :longitude, :distance]
+  ALLOWED_KEYS = [:latitude, :longitude, :distance, :elevation]
   REQUIRED_KEYS = [:latitude, :longitude]
 
   def has_only_gps_points? array
@@ -35,6 +33,7 @@ class Trace
   validates_with GPSPointsValidator
 
   before_save :ensure_value_has_distance!
+  before_save :ensure_value_has_elevation!
 
   def as_json options
     if valid?
@@ -44,36 +43,16 @@ class Trace
     end
   end
 
-  # This method is added to add distances to old records if they are requested
-  # TODO: Remove this method after all old records in db are saved with distances
-  def ensure_value_has_distance_and_save!
-    save unless value_has_distances?
+  # This method is added to add distances and elevations to old records if they are requested
+  # TODO: Remove this method after all old records in db are saved with distances and elevations
+  def ensure_value_has_distance_and_elevation_and_save!
+    save unless value_has_distances? && value_has_elevations?
     self
   end
 
-
   private
 
-  def ensure_value_has_distance!
-    return if value_has_distances?
-    self.value.map! &:symbolize_keys!
-    self.value.first.merge! distance: 0
-    current_distance = 0
-    (1..value.count-1).each do |i|
-      current_distance += self.class.distance_between(value[i], value[i-1])
-      self.value[i].merge! distance: current_distance.to_i
-    end
-  end
-
-
-  def self.distance_between p1, p2
-    GeoDistance::Haversine.geo_distance(p1[:latitude], p1[:longitude], p2[:latitude], p2[:longitude]).to_meters
-  end
-
-  def value_has_distances?
-    value.map do |point|
-      point.has_key?(:distance) or point.has_key?('distance')
-    end.all?
-  end
+  include DistanceCalcualtor
+  include ElevationLoader
 
 end

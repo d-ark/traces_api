@@ -33,6 +33,7 @@ module TracesApi
         [
           [{"longitude" => 78.58,"latitude" => 125.545}],
           [{"longitude" => 78.58,"latitude" => 125.545, "distance" => 0}],
+          [{"longitude" => 78.58,"latitude" => 125.545, "elevation" => 780}],
           [{"longitude" => 78.58,"latitude" => 125}],
           [{"longitude" => 78.58, latitude: 125.545}],
           [{"longitude" => 78.58,"latitude" => 125.545}, {"longitude" => 78.58,"latitude" => 125.545}],
@@ -99,6 +100,50 @@ module TracesApi
       end
 
     end
+
+    describe '#value_has_elevations?' do
+      it 'is false if at least one elevation is not set' do
+        trace = Trace.new value: [{latitude: 1, longitude: 1, distance: 0, elevation: 1378},
+                                  {latitude: 2, longitude: 2, distance: 13},
+                                  {latitude: 3, longitude: 3, distance: 78, elevation: 1378}]
+        expect(trace.send :value_has_elevations?).not_to be
+      end
+      it 'is true if at all elevations are not set' do
+        trace = Trace.new value: [{latitude: 1, longitude: 1, distance: 0, elevation: 1378},
+                                  {latitude: 2, longitude: 2, distance: 13, elevation: 1379},
+                                  {latitude: 3, longitude: 3, distance: 78, elevation: 1378}]
+        expect(trace.send :value_has_elevations?).to be
+      end
+    end
+
+
+    describe '#ensure_value_has_elvation!' do
+      let(:trace) { build :trace1 }
+
+      it 'is called after on saving record' do
+        allow(trace).to receive :ensure_value_has_elevation!
+        trace.save
+        expect(trace).to have_received(:ensure_value_has_elevation!).once
+      end
+
+      it 'adds elevation if it is not provided' do
+        initial_value = [
+          {"latitude" => 32.9377784729004, "longitude" => -117.230392456055},
+          {"latitude" => 32.937801361084,  "longitude" => -117.230323791504}
+        ]
+
+        result_value = [
+          {latitude: 32.9377784729004, longitude: -117.230392456055, elevation: 4139},
+          {latitude: 32.937801361084,  longitude: -117.230323791504, elevation: 4139}
+        ]
+
+        trace = Trace.new value: initial_value
+        expect { trace.send :ensure_value_has_elevation! }.to change { trace.value.to_json }
+          .from(initial_value.to_json).to(result_value.to_json)
+      end
+
+    end
+
 
   end
 end

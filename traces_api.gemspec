@@ -24,4 +24,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "nyny"
   spec.add_runtime_dependency "mongoid"
   spec.add_runtime_dependency "geo-distance"
+  spec.add_runtime_dependency "rest-client"
 end
